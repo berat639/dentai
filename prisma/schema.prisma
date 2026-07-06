@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  patientName   String   @map("patient_name")
+  patientPhone  String   @map("patient_phone")
+  patientEmail  String?  @map("patient_email")
+  treatmentType String   @map("treatment_type")
+  date          DateTime
+  time          String
+  status        String   @default("pending") // pending, confirmed, completed, cancelled
+  notes         String?
+  source        String   @default("phone") // phone, admin, web
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("appointments")
+}
+
+model Treatment {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  minPrice    Int      @map("min_price")
+  maxPrice    Int      @map("max_price")
+  duration    String?  // e.g., "30-60 dakika"
+  category    String   @default("genel") // genel, cerrahi, estetik, ortodonti, protez
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("treatments")
+}
+
+model KnowledgeBase {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   @default("genel") // genel, tedavi, sss, acil, bakim
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("knowledge_base")
+}
+
+model CallLog {
+  id        String   @id @default(cuid())
+  duration  Int      // seconds
+  summary   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("call_logs")
+}

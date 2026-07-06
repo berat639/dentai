@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Sesli Asistan — Gerçek Zamanlı Sesli Sohbet",
+  title: "DentAI — Diş Kliniği Asistanı",
   description:
-    "Yapay zeka destekli gerçek zamanlı sesli sohbet deneyimi",
+    "Yapay zeka destekli diş kliniği asistanı. Randevu alın, tedavi bilgisi ve fiyatlar hakkında bilgi edinin.",
 };
 
 export default function RootLayout({

@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" layer(tailwind);
+@import "../styles/admin.css";
 
 :root {
   --bg-primary: #0a0a0f;

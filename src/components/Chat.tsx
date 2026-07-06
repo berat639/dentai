@@ -89,7 +89,7 @@ export default function Chat() {
 
       // Wait for WebSocket to be fully connected
       console.log("[Chat] Connecting to Gemini...");
-      await session.connect(data.apiKey);
+      await session.connect(data.apiKey, data.systemPrompt || undefined);
       console.log("[Chat] Connected! Starting microphone...");
 
       // 4. Start microphone capture ONLY after connection is confirmed
@@ -114,8 +114,11 @@ export default function Chat() {
       }, 1000);
 
       setConnectionState("connected");
-      setStatusText("Konuşmaya başlayabilirsiniz!");
+      setStatusText("Bağlantı kuruldu, asistan konuşmaya başlıyor...");
       console.log("[Chat] Live call started successfully");
+
+      // 6. Trigger Gemini to speak first
+      session.sendText("Merhaba, lütfen kendini tanıt ve hastaya nasıl yardımcı olabileceğini söyle.");
     } catch (err) {
       console.error("[Chat] Failed to start call:", err);
       setErrorText(
@@ -222,7 +225,8 @@ export default function Chat() {
                 stroke="white"
                 strokeWidth="1.5"
               >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                <path d="M12 2C8 2 5 5 5 9c0 3 1.5 5 3 6.5S12 22 12 22s2.5-3.5 4-5.5S19 12 19 9c0-4-3-7-7-7z" />
+                <circle cx="12" cy="9" r="2" />
               </svg>
             </div>
             {/* Pulse rings */}
@@ -253,22 +257,22 @@ export default function Chat() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            AI Sesli Asistan
+            DentAI Diş Kliniği
           </h1>
 
           <p
             className="text-base text-center max-w-md mb-2"
             style={{ color: "var(--text-secondary)" }}
           >
-            Yapay zeka ile gerçek zamanlı sesli sohbet
+            Yapay zeka destekli diş kliniği asistanınız
           </p>
 
           <p
             className="text-sm text-center max-w-md mb-10"
             style={{ color: "var(--text-muted)" }}
           >
-            Mikrofon butonuna basın ve doğrudan konuşmaya başlayın.
-            AI sizi dinleyecek ve sesli yanıt verecek.
+            Randevu almak, tedaviler hakkında bilgi edinmek veya fiyatlarımızı öğrenmek için
+            mikrofon butonuna basın ve konuşmaya başlayın.
           </p>
 
           {/* Error message */}
@@ -317,10 +321,10 @@ export default function Chat() {
           {/* Info chips */}
           <div className="flex flex-wrap gap-3 mt-10 justify-center">
             {[
-              { icon: "🎙", label: "Orus Sesi" },
-              { icon: "🌐", label: "Türkçe" },
-              { icon: "⚡", label: "Gerçek Zamanlı" },
-              { icon: "🧠", label: "Yapay Zeka" },
+              { icon: "🦷", label: "Tedavi Bilgisi" },
+              { icon: "📅", label: "Randevu" },
+              { icon: "💰", label: "Fiyat Bilgisi" },
+              { icon: "🏥", label: "Kadıköy/İstanbul" },
             ].map((chip) => (
               <div
                 key={chip.label}
@@ -368,7 +372,8 @@ export default function Chat() {
                   stroke="white"
                   strokeWidth="2"
                 >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  <path d="M12 2C8 2 5 5 5 9c0 3 1.5 5 3 6.5S12 22 12 22s2.5-3.5 4-5.5S19 12 19 9c0-4-3-7-7-7z" />
+                  <circle cx="12" cy="9" r="2" />
                 </svg>
               </div>
             </div>
@@ -441,7 +446,8 @@ export default function Chat() {
               stroke="white"
               strokeWidth="2"
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path d="M12 2C8 2 5 5 5 9c0 3 1.5 5 3 6.5S12 22 12 22s2.5-3.5 4-5.5S19 12 19 9c0-4-3-7-7-7z" />
+              <circle cx="12" cy="9" r="2" />
             </svg>
           </div>
           <div>
@@ -449,7 +455,7 @@ export default function Chat() {
               className="text-base font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              AI Sesli Asistan
+              DentAI Asistan
             </h1>
             <div className="flex items-center gap-1.5">
               <div
@@ -476,7 +482,7 @@ export default function Chat() {
               border: "1px solid rgba(139, 92, 246, 0.2)",
             }}
           >
-            🎙 Orus
+            🦷 Diş Kliniği
           </div>
         </div>
       </header>
@@ -542,7 +548,8 @@ export default function Chat() {
                 transform: isGeminiSpeaking ? "scale(1.1)" : "scale(1)",
               }}
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path d="M12 2C8 2 5 5 5 9c0 3 1.5 5 3 6.5S12 22 12 22s2.5-3.5 4-5.5S19 12 19 9c0-4-3-7-7-7z" />
+              <circle cx="12" cy="9" r="2" />
             </svg>
           </div>
         </div>
@@ -557,7 +564,7 @@ export default function Chat() {
           }}
         >
           {isGeminiSpeaking
-            ? "AI konuşuyor..."
+            ? "Asistan konuşuyor..."
             : "Dinleniyor..."}
         </p>
 
@@ -623,7 +630,7 @@ export default function Chat() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") sendText();
                 }}
-                placeholder="Yazarak da mesaj gönderebilirsiniz..."
+                placeholder="Randevu, tedavi veya fiyat sorusu yazın..."
                 className="flex-1 bg-transparent outline-none text-sm"
                 style={{
                   color: "var(--text-primary)",
@@ -671,7 +678,7 @@ export default function Chat() {
             className="text-center text-[11px] mt-3"
             style={{ color: "var(--text-muted)" }}
           >
-            Konuşmaya başlayın · AI sizi gerçek zamanlı dinliyor
+            Randevu, tedavi bilgisi veya fiyatlar hakkında sorabilirsiniz
           </p>
         </div>
       </div>

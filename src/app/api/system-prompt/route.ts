@@ -2,18 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured" },
-      { status: 500 }
-    );
-  }
-
-  // Build dynamic system prompt from DB
-  let systemPrompt: string | null = null;
   try {
+    // Fetch active treatments and knowledge base from DB
     const [treatments, knowledgeEntries] = await Promise.all([
       prisma.treatment.findMany({
         where: { isActive: true },
@@ -25,15 +15,17 @@ export async function GET() {
       }),
     ]);
 
+    // Build treatment price list
     const priceList = treatments
       .map((t) => `- ${t.name}: ${t.minPrice.toLocaleString("tr-TR")} - ${t.maxPrice.toLocaleString("tr-TR")} TL${t.duration ? ` (${t.duration})` : ""}`)
       .join("\n");
 
+    // Build knowledge base content
     const knowledgeContent = knowledgeEntries
       .map((k) => `### ${k.title}\n${k.content}`)
       .join("\n\n");
 
-    systemPrompt = `Sen bir diş kliniği asistanısın. Adın "DentAI". Türkçe konuşuyorsun. Görevlerin:
+    const systemPrompt = `Sen bir diş kliniği asistanısın. Adın "DentAI". Türkçe konuşuyorsun. Görevlerin:
 
 1. RANDEVU YÖNETİMİ:
 - Hasta randevu almak istediğinde: Adını, telefon numarasını, tercih ettiği tarih ve saati sor.
@@ -57,9 +49,13 @@ ${knowledgeContent || "Ek bilgi henüz girilmemiş."}
 - Acil hat: 0532 555 00 00
 
 Konuşmaya "Merhaba! DentAI diş kliniği asistanıyım. Size nasıl yardımcı olabilirim? Randevu almak, tedaviler hakkında bilgi edinmek veya fiyatlarımızı öğrenmek ister misiniz?" diye başla.`;
-  } catch (error) {
-    console.error("Failed to build system prompt from DB:", error);
-  }
 
-  return NextResponse.json({ apiKey, systemPrompt });
+    return NextResponse.json({ systemPrompt });
+  } catch (error) {
+    console.error("System prompt error:", error);
+    // Fallback to hardcoded prompt
+    return NextResponse.json({
+      systemPrompt: `Sen bir diş kliniği asistanısın. Adın "DentAI". Türkçe konuşuyorsun. Randevu yönetimi, tedavi bilgileri ve fiyat bilgisi verme görevlerin var. Konuşmaya "Merhaba! DentAI diş kliniği asistanıyım. Size nasıl yardımcı olabilirim?" diye başla.`,
+    });
+  }
 }
