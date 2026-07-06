@@ -11,6 +11,7 @@ COPY prisma.config.ts ./
 RUN npm ci
 
 # Generate Prisma Client
+ENV DATABASE_URL="postgresql://postgres:postgres@postgres:5432/dentai"
 RUN npx prisma generate
 
 # Rebuild the source code only when needed
